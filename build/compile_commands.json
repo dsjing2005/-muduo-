@@ -1,0 +1,62 @@
+[
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/chatserver.cpp.o -c /home/dsj/project/src/server/chatserver.cpp",
+  "file": "/home/dsj/project/src/server/chatserver.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/chatserver.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/chatservice.cpp.o -c /home/dsj/project/src/server/chatservice.cpp",
+  "file": "/home/dsj/project/src/server/chatservice.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/chatservice.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/main.cpp.o -c /home/dsj/project/src/server/main.cpp",
+  "file": "/home/dsj/project/src/server/main.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/main.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/db/db.cpp.o -c /home/dsj/project/src/server/db/db.cpp",
+  "file": "/home/dsj/project/src/server/db/db.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/db/db.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/model/friendmodel.cpp.o -c /home/dsj/project/src/server/model/friendmodel.cpp",
+  "file": "/home/dsj/project/src/server/model/friendmodel.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/model/friendmodel.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/model/groupmodel.cpp.o -c /home/dsj/project/src/server/model/groupmodel.cpp",
+  "file": "/home/dsj/project/src/server/model/groupmodel.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/model/groupmodel.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/model/offlinemsgmodel.cpp.o -c /home/dsj/project/src/server/model/offlinemsgmodel.cpp",
+  "file": "/home/dsj/project/src/server/model/offlinemsgmodel.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/model/offlinemsgmodel.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/model/usermodel.cpp.o -c /home/dsj/project/src/server/model/usermodel.cpp",
+  "file": "/home/dsj/project/src/server/model/usermodel.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/model/usermodel.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/server",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatServer.dir/redis/redis.cpp.o -c /home/dsj/project/src/server/redis/redis.cpp",
+  "file": "/home/dsj/project/src/server/redis/redis.cpp",
+  "output": "src/server/CMakeFiles/ChatServer.dir/redis/redis.cpp.o"
+},
+{
+  "directory": "/home/dsj/project/build/src/client",
+  "command": "/usr/bin/g++  -I/usr/local/muduo/include -I/usr/include/mysql -I/home/dsj/project/include -I/home/dsj/project/include/server -I/home/dsj/project/include/server/db -I/home/dsj/project/include/server/model -I/home/dsj/project/thirdparty -I/home/dsj/project/include/server/redis -g -g -o CMakeFiles/ChatClient.dir/main.cpp.o -c /home/dsj/project/src/client/main.cpp",
+  "file": "/home/dsj/project/src/client/main.cpp",
+  "output": "src/client/CMakeFiles/ChatClient.dir/main.cpp.o"
+}
+]

@@ -1,0 +1,10 @@
+/home/dsj/project/build/CMakeFiles/edit_cache.dir
+/home/dsj/project/build/CMakeFiles/rebuild_cache.dir
+/home/dsj/project/build/src/CMakeFiles/edit_cache.dir
+/home/dsj/project/build/src/CMakeFiles/rebuild_cache.dir
+/home/dsj/project/build/src/server/CMakeFiles/ChatServer.dir
+/home/dsj/project/build/src/server/CMakeFiles/edit_cache.dir
+/home/dsj/project/build/src/server/CMakeFiles/rebuild_cache.dir
+/home/dsj/project/build/src/client/CMakeFiles/ChatClient.dir
+/home/dsj/project/build/src/client/CMakeFiles/edit_cache.dir
+/home/dsj/project/build/src/client/CMakeFiles/rebuild_cache.dir
