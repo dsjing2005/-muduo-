@@ -22,6 +22,9 @@ public:
     //查询操作
     MYSQL_RES* query(std::string sql);
 
+    //转义SQL字符串字段
+    std::string escape(const std::string& value);
+
     //获取连接
     MYSQL* getConnection();
 private:

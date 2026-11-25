@@ -1,3 +1,5 @@
+#include "chatcodec.hpp"
+#include <muduo/base/Logging.h>
 #include "chatserver.hpp"
 #include <nlohmann/json.hpp>
 #include "chatservice.hpp"
@@ -45,17 +47,28 @@ void ChatServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
                            muduo::net::Buffer * buffer,
                            muduo::Timestamp time)
 {
-    //收到用户断开连接消息
-    std::string buf=buffer->retrieveAllAsString();
+    while(buffer->readableBytes()>=sizeof(int32_t))
+    {
+        uint32_t length=static_cast<uint32_t>(buffer->peekInt32());
+        if(length==0||length>MAX_CHAT_FRAME)
+        {
+            conn->forceClose();
+            return;
+        }
+        if(buffer->readableBytes()<sizeof(int32_t)+length) return;
 
-    //数据的反序列化
-    json js=json::parse(buf);
-
-    //达到的目的：完全解耦网络模块的代码和业务模块的代码
-    //通过js["msgid"] 获取  ->   业务处理器handler  ->  传递参数：conn js time
-    auto msgHandler=ChatService::instance()->getHandler(js["msgid"].get<int>());
-
-    //业务层处理：回调消息绑定好的事件处理器，来执行相应的业务处理
-    msgHandler(conn,js,time); 
-
+        buffer->retrieve(sizeof(int32_t));
+        try
+        {
+            json js=json::parse(buffer->retrieveAsString(length));
+            auto msgHandler=ChatService::instance()->getHandler(js.at("msgid").get<int>());
+            msgHandler(conn,js,time);
+        }
+        catch(const json::exception& error)
+        {
+            LOG_WARN<<"invalid chat request: "<<error.id;
+            conn->forceClose();
+            return;
+        }
+    }
 }

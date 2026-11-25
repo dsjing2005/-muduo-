@@ -7,6 +7,7 @@
 #include "json.hpp"
 #include "usermodel.hpp"
 #include "offlinemsgmodel.hpp"
+#include "chatmessagemodel.hpp"
 #include "friendmodel.hpp"
 #include "groupmodel.hpp"
 #include "redis.hpp"
@@ -48,6 +49,12 @@ public:
     //处理注销业务
     void loginout(const TcpConnectionPtr& conn,json& js,muduo::Timestamp);
 
+    //刷新好友和群组
+    void contacts(const TcpConnectionPtr& conn,json& js,muduo::Timestamp);
+
+    //查询会话历史
+    void history(const TcpConnectionPtr& conn,json& js,muduo::Timestamp);
+
     //获取消息对应的处理器
     MsgHandler getHandler(int msgid);
 
@@ -63,12 +70,17 @@ public:
 private:
     ChatService();
 
+    bool requireLogin(const TcpConnectionPtr& conn,json& js);
+    void fillContacts(int userid,json& response);
+    bool deliver(int userid,const std::string& message,uint64_t messageid);
+
     //存储消息id和其对应的业务处理方法
     std::unordered_map<int,MsgHandler> _msgHandlerMap;
 
     //数据操作类对象
     UserModel _userModel;
     OfflineMsgModel _offlineMsgModel;
+    ChatMessageModel _chatMessageModel;
     FriendModel _friendModel;
     GroupModel _groupModel;
 

@@ -1,7 +1,7 @@
 #include"friendmodel.hpp"
 #include "db.h"
 //添加好友关系
-void FriendModel::insert(int userid,int friendid)
+bool FriendModel::insert(int userid,int friendid)
 {
     //1.组装sql语句
     char sql[1024]={0};
@@ -10,8 +10,9 @@ void FriendModel::insert(int userid,int friendid)
     MySQL mysql;
     if(mysql.connect())
     {
-        mysql.update(sql);
+        return mysql.update(sql);
     }
+    return false;
 }
 
 //返回用户好友列表
@@ -21,7 +22,7 @@ std::vector<User> FriendModel::query(int userid)
     char sql[1024]={0};
     //select us.id,us.name,us.state from Friend fri left join User us 
     //on fri.friendid=us.id where us.id=1;
-    sprintf(sql,"select us.id,us.name,us.state from Friend fri left join User us on fri.friendid=us.id where us.id=%d;",userid);
+    sprintf(sql,"select us.id,us.name,us.state from Friend fri join User us on fri.friendid=us.id where fri.userid=%d;",userid);
 
     std::vector<User> vec;
     MySQL mysql;

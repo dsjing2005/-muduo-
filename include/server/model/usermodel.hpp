@@ -13,6 +13,7 @@ public:
     User query(int id);
 
     //跟新用户信息
+    bool claimOnline(int userid);
     bool updateState(User& user);
 
     //重置用户的状态信息

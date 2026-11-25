@@ -1,0 +1,24 @@
+# 放在 nginx.conf 的 http 块中，或在 http 块中 include 此文件
+map $http_upgrade $chat_connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 8081;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $http_host;
+    }
+
+    location = /ws {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $chat_connection_upgrade;
+        proxy_read_timeout 75s;
+    }
+}

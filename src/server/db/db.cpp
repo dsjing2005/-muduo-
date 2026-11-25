@@ -31,7 +31,11 @@ bool MySQL::connect()
     if(p!=nullptr)
     {
         //c和C++默认的编码字符是ASCII，如果不设置，从MySQL上拉下来的是乱码
-        mysql_query(_conn,"set names utf8mb4");
+        if(mysql_set_character_set(_conn,"utf8mb4")!=0)
+        {
+            LOG_ERROR<<"set mysql charset failed: "<<mysql_error(_conn);
+            return false;
+        }
         LOG_INFO<<"connect mysql success!";
     }
     else
@@ -69,4 +73,10 @@ MYSQL_RES* MySQL::query(std::string sql)
 MYSQL* MySQL::getConnection()
 {
     return _conn;
+}
+std::string MySQL::escape(const std::string& value)
+{
+    std::string escaped(value.size()*2+1,'\0');
+    escaped.resize(mysql_real_escape_string(_conn,&escaped[0],value.data(),value.size()));
+    return escaped;
 }

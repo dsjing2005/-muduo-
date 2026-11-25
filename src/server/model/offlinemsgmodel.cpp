@@ -3,18 +3,11 @@
 
 
 //存储用户的离线消息
-void OfflineMsgModel::insert(int userid,std::string msg)
+bool OfflineMsgModel::insert(int userid,std::string msg)
 {
-    //1.组装sql语句
-    char sql[1024]={0};
-    sprintf(sql,"insert into OfflineMessage values(%d,'%s')",userid,msg.c_str());
-
-
     MySQL mysql;
-    if(mysql.connect())
-    {
-        mysql.update(sql);
-    }
+    if(!mysql.connect()) return false;
+    return mysql.update("insert into OfflineMessage values("+std::to_string(userid)+",'"+mysql.escape(msg)+"')");
 }
 
 //删除用户的离线消息

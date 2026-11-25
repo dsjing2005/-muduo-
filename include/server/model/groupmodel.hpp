@@ -7,14 +7,17 @@ class GroupModel
 {
 public:
     //创建群组
-    bool createGroup(AllGroup& allgroup);
+    bool createGroup(AllGroup& allgroup,int userid);
 
     //加入群组
-    void addGroup(int userid,int groupid ,std::string role);
+    bool addGroup(int userid,int groupid ,std::string role);
+
+    //检查指定用户是否属于该群组
+    bool hasMember(int userid,int groupid);
 
     //查询用户所在群组信息
     std::vector<AllGroup> queryGroup(int userid);
 
-    //根据指定的groupid查询群组用户id列表，除userid自己，主要用户群聊业务给群组其他成员群发消息
-    std::vector<int> queryGroupUsers(int userid,int groupid);
+    //根据指定的groupid查询群组用户id列表，主要用户群聊业务给群组其他成员群发消息
+    std::vector<int> queryGroupUsers(int groupid);
 };

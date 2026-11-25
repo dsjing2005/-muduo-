@@ -1,3 +1,5 @@
+#include "chatcodec.hpp"
+#include<cerrno>
 #include "json.hpp"
 #include<iostream>
 #include<thread>
@@ -18,6 +20,45 @@ using json=nlohmann::json;
 #include "allgroup.hpp"
 #include "user.hpp"
 #include "public.hpp"
+
+//完整读写一帧，处理TCP拆包和粘包
+int sendMessage(int fd,const std::string& message)
+{
+    if(message.empty()||message.size()>MAX_CHAT_FRAME) return -1;
+    std::string frame=encodeChatFrame(message);
+    size_t offset=0;
+    while(offset<frame.size())
+    {
+        ssize_t count=send(fd,frame.data()+offset,frame.size()-offset,MSG_NOSIGNAL);
+        if(count<0&&errno==EINTR) continue;
+        if(count<=0) return -1;
+        offset+=count;
+    }
+    return static_cast<int>(offset);
+}
+
+bool readBytes(int fd,char* buffer,size_t size)
+{
+    size_t offset=0;
+    while(offset<size)
+    {
+        ssize_t count=recv(fd,buffer+offset,size-offset,0);
+        if(count<0&&errno==EINTR) continue;
+        if(count<=0) return false;
+        offset+=count;
+    }
+    return true;
+}
+
+bool readMessage(int fd,std::string& message)
+{
+    uint32_t header=0;
+    if(!readBytes(fd,reinterpret_cast<char*>(&header),sizeof(header))) return false;
+    uint32_t length=ntohl(header);
+    if(length==0||length>MAX_CHAT_FRAME) return false;
+    message.resize(length);
+    return readBytes(fd,&message[0],length);
+}
 
 //记录当前系统登录的用户信息
 User g_currentUser;
@@ -84,7 +125,7 @@ int main(int argc,char** argv)
         std::cout<<"========================"<<std::endl;
         std::cout<<"choice:"<<std::endl;
         int choice=0;
-        std::cin>>choice;
+        if(!(std::cin>>choice)) break;
         std::cin.get();     //读掉缓冲区残留的回车
 
         switch(choice)
@@ -105,18 +146,19 @@ int main(int argc,char** argv)
                 js["password"]=pwd;
                 std::string request=js.dump();
 
-                int len =send(clientfd,request.c_str(),strlen(request.c_str())+1,0);
+                int len =sendMessage(clientfd,request);
                 if(len==-1)
                 {
-                    std::cerr<<"send login msg error: "<<request<<std::endl;
+                    std::cerr<<"send login msg error"<<std::endl;
                 }
                 else 
                 {
-                    char buffer[1024]={0};
-                    len =recv(clientfd,buffer,1024,0);
-                    if(len==-1)
+                    std::string buffer;
+                    if(!readMessage(clientfd,buffer))
                     {
                         std::cerr<<"recv login response error"<<std::endl;
+                        close(clientfd);
+                        return 1;
                     }
                     else 
                     {
@@ -132,11 +174,9 @@ int main(int argc,char** argv)
                             g_currentUser.setName(responsejs["name"]);
 
                             //记录当前用户的好友列表信息
+                            g_currentFriendList.clear();
                             if(responsejs.contains("friends"))
                             {
-                                //初始化：
-                                g_currentFriendList.clear();
-
                                 std::vector<std::string> vec=responsejs["friends"];
                                 for(auto &str:vec)
                                 {
@@ -150,11 +190,9 @@ int main(int argc,char** argv)
                             }
 
                             //记录当前用户的群组列表信息
+                            g_currentUserGroupList.clear();
                             if(responsejs.contains("groups"))
                             {
-                                //初始化：
-                                g_currentUserGroupList.clear();
-
                                 std::vector<std::string> vec1=responsejs["groups"];
                                 for(auto& groupstr:vec1)
                                 {
@@ -208,16 +246,10 @@ int main(int argc,char** argv)
                                 }
                             }
 
-                            //登录成功，启动接收线程负责接收数据   该线程只启动一次
-                            static int readthreadnumber=0;
-                            if(readthreadnumber==0)
-                            {
-                                std::thread readTask(readTaskHandler,clientfd);
-                                readTask.detach();
-                                readthreadnumber++;
-                            }
-                            //进入聊天主菜单页面
+                            //注销回执到达后接收线程退出，再回到登录菜单
+                            std::thread readTask(readTaskHandler,clientfd);
                             mainMenu(clientfd);
+                            readTask.join();
                         }
                     }
                 }
@@ -238,18 +270,19 @@ int main(int argc,char** argv)
                 js["password"]=pwd;
                 std::string request=js.dump();
                 
-                int len=send(clientfd,request.c_str(),strlen(request.c_str())+1,0);
+                int len=sendMessage(clientfd,request);
                 if(len==-1)
                 {
-                    std::cerr<<"send reg msg error "<<request<<std::endl;
+                    std::cerr<<"send reg msg error"<<std::endl;
                 }
                 else 
                 {
-                    char buffer[1024]={0};
-                    len = recv(clientfd,buffer,1024,0);
-                    if(len==-1)
+                    std::string buffer;
+                    if(!readMessage(clientfd,buffer))
                     {
                         std::cerr<<"recv reg response error"<<std::endl;
+                        close(clientfd);
+                        return 1;
                     }
                     else 
                     {
@@ -315,9 +348,8 @@ void readTaskHandler(int clientfd)
 {
     for(;;)
     {
-        char buffer[1024]={0};
-        int len=recv(clientfd,buffer,1024,0);
-        if(len==0||len==-1)
+        std::string buffer;
+        if(!readMessage(clientfd,buffer))
         {
             close(clientfd);
             exit(-1);
@@ -325,13 +357,14 @@ void readTaskHandler(int clientfd)
 
         //接收ChatServer转发的数据，反序列化生成的json数据对象
         json js=json::parse(buffer);
+        if(js["msgid"]==OPERATION_ACK&&js.value("operation",0)==LOGINOUT_MSG) return;
         if(js["msgid"].get<int>()==ONE_CHAT_MSG)    //一对一聊天
         {
             std::cout<<js["time"].get<std::string>()<<"["<<js["id"]<<"]"<<
             js["name"].get<std::string>()<<"said: "<<js["msg"].get<std::string>()<<std::endl;
             continue;
         }
-        else        //群聊天
+        else if(js["msgid"]==GROUP_CHAT_MSG)        //群聊天
         {
             std::cout<<"群消息["<<js["groupid"]<<"]: "<<js["time"].get<std::string>()<<"["<<js["id"]<<"]"<<
             js["name"].get<std::string>()<<"said: "<<js["msg"].get<std::string>()<<std::endl;
@@ -401,7 +434,11 @@ void mainMenu(int clientfd)
     char buffer[1024]={0};
     for(;;)
     {
-        std::cin.getline(buffer,1024);
+        if(!std::cin.getline(buffer,1024))
+        {
+            loginout(clientfd,"");
+            break;
+        }
         std::string commandbuf(buffer);     //将读取的str转换为string
 
         std::string command;        //存储命令
@@ -460,7 +497,7 @@ void chat(int clientfd,std::string str)
     js["time"]=getCurrentTime();
     std::string buffer=js.dump();
 
-    int len =send(clientfd,buffer.c_str(),strlen(buffer.c_str())+1,0);
+    int len =sendMessage(clientfd,buffer);
     if(len == -1)
     {
         std::cerr<<" send chat msg error "<<buffer<<std::endl;
@@ -477,7 +514,7 @@ void addfriend(int clientfd,std::string str)
     js["friendid"]=friendid;
     std::string buffer=js.dump();
 
-    int len=send(clientfd,buffer.c_str(),strlen(buffer.c_str())+1,0);
+    int len=sendMessage(clientfd,buffer);
     if(len==-1)
     {
         std::cerr<<"send addfriend msg error ->"<<buffer<<std::endl;
@@ -502,7 +539,7 @@ void creategroup(int clientfd,std::string str)
 
     std::string buffer=js.dump();
 
-    int len=send(clientfd,buffer.c_str(),strlen(buffer.c_str())+1,0);
+    int len=sendMessage(clientfd,buffer);
     if(len==-1)
     {
         std::cerr<<" send creategroup msg error-> "<<buffer<<std::endl;
@@ -519,7 +556,7 @@ void addgroup(int clientfd,std::string str)
     js["groupid"]=groupid;
     std::string buffer=js.dump();
 
-    int len =send(clientfd,buffer.c_str(),strlen(buffer.c_str())+1,0);
+    int len =sendMessage(clientfd,buffer);
     if(len==-1)
     {
         std::cerr<<" send addgroup msg failed"<<buffer<<std::endl;
@@ -546,7 +583,7 @@ void groupchat(int clientfd,std::string str)
 
     std::string buffer=js.dump();
 
-    int len=send(clientfd,buffer.c_str(),strlen(buffer.c_str())+1,0);
+    int len=sendMessage(clientfd,buffer);
     if(len==-1)
     {
         std::cerr<<" send groupchat msg error-> "<<buffer<<std::endl;
@@ -560,9 +597,10 @@ void loginout(int fd,std::string str)
     js["id"]=g_currentUser.getId();
     std::string buffer=js.dump();
 
-    int len=send(fd,buffer.c_str(),strlen(buffer.c_str())+1,0);
+    int len=sendMessage(fd,buffer);
     if(len==-1)
     {
-        std::cerr<<"send loginout msg failed! "<<buffer<<std::endl;
+        std::cerr<<"send loginout msg failed!"<<std::endl;
+        shutdown(fd,SHUT_RDWR);
     }
 }

@@ -19,5 +19,8 @@ enum EnMsgType{
     ADD_GROUP_MSG,          //加入群组
     GROUP_CHAT_MSG,         //群聊天
 
-    LOGINOUT_MSG        //注销消息
+    LOGINOUT_MSG,       //注销消息
+    CONTACTS_MSG,       //刷新好友和群组
+    OPERATION_ACK,      //操作回执
+    HISTORY_MSG         //查询会话历史
 };

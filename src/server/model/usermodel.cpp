@@ -4,14 +4,11 @@
 //user表的增加方法
 bool UserModel::insert(User& user)
 {   
-    //1.组装sql语句
-    char sql[1024]={0};
-    sprintf(sql,"insert into User(name,password,state) values('%s','%s','%s')",
-    user.getName().c_str(),user.getPwd().c_str(),user.getState().c_str());
-
     MySQL mysql;
     if(mysql.connect())
     {
+        std::string sql="insert into User(name,password,state) values('"+mysql.escape(user.getName())+
+            "','"+mysql.escape(user.getPwd())+"','"+mysql.escape(user.getState())+"')";
         if(mysql.update(sql))
         {
             //获取插入成功的用户数据生成的主键id
@@ -84,4 +81,11 @@ void UserModel::resetState()
             
         }
     }
+}
+//原子更新在线状态，避免多实例同时登录同一账号
+bool UserModel::claimOnline(int userid)
+{
+    MySQL mysql;
+    return mysql.connect()&&mysql.update("update User set state='online' where id="+
+        std::to_string(userid)+" and state='offline'")&&mysql_affected_rows(mysql.getConnection())==1;
 }
